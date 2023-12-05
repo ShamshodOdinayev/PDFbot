@@ -1,5 +1,7 @@
 package com.company.enums;
 
+import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.List;
 
 public interface ServiceEnum {
@@ -12,4 +14,8 @@ public interface ServiceEnum {
     boolean checkAvailabilityImage(List<String> pictureName);
     void deleteJPG(List<String> jpgName);
     void deletePDF(String path);
+
+    boolean createProfile(Message message);
+
+    boolean adminCheck(Message message);
 }

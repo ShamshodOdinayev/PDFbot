@@ -1,11 +1,15 @@
 package com.company.service;
 
+import com.company.dto.Profile;
+import com.company.enums.ProfileRole;
 import com.company.enums.ServiceEnum;
+import com.company.repository.Repository;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -18,6 +22,7 @@ import java.util.Properties;
 
 public class ServiceI implements ServiceEnum {
     private static final Properties properties = new Properties();
+    Repository repository = new Repository();
 
     static {
         try (FileInputStream input = new FileInputStream("src/main/resources/application.properties")) {
@@ -87,6 +92,28 @@ public class ServiceI implements ServiceEnum {
                 file.delete();
             }
         }
+    }
+
+    @Override
+    public boolean createProfile(Message message) {
+        Profile profile = new Profile();
+        profile.setChatId(String.valueOf(message.getChatId()));
+        Profile profileDb = repository.getProfileByChatId(message.getChatId().toString());
+        if (profileDb != null) {
+            return true;
+        }
+        profile.setRole(ProfileRole.USER);
+        profile.setFullName(message.getForwardSenderName());
+        return repository.createProfile(profile) != 0;
+    }
+
+    @Override
+    public boolean adminCheck(Message message) {
+        Profile profile = repository.getProfileByChatId(message.getChatId().toString());
+        if (profile != null && profile.getRole().equals(ProfileRole.ADMIN)) {
+           return true;
+        }
+        return false;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.company;
 
+import com.company.dto.Profile;
 import com.company.enums.ServiceEnum;
+import com.company.repository.Repository;
 import com.company.service.ServiceI;
 import com.company.util.ReplyKeyboardUtil;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -45,11 +47,17 @@ public class PDFBotLongPolling extends TelegramLongPollingBot {
                 Message message = update.getMessage();
                 if (update.getMessage().hasText()) {
                     if (message.getText().equals("/start")) {
-                        startMenuMessage(message);
+                        if (service.createProfile(message)) {
+                            startMenuMessage(message);
+                        }
                     } else if (message.getText().equals("Rasm jo'natish yakunlandi")) {
                         pictureSaveMessage(message);
                     } else if (message.getText().equals("Create PDF")) {
                         createPDF(message);
+                    } else if (message.getText().equals("/adminjon")) {
+                        adminPanel(message);
+                    } else if (message.getText().equals("Foydalanuvchilarni ko'rish")) {
+                        getAllProfile(message);
                     }
                 } else if (message.hasPhoto()) {
                     pictureSave(update);
@@ -57,6 +65,32 @@ public class PDFBotLongPolling extends TelegramLongPollingBot {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void getAllProfile(Message message) {
+        if (service.adminCheck(message)) {
+            Repository repository = new Repository();
+            List<Profile> profileList = repository.getAll();
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Profile profile : profileList) {
+                stringBuilder.append("Name: ").append(profile.getFullName()).append(" Phone: ").append(profile.getPhone()).append(" Role: ").append(profile.getRole());
+                stringBuilder.append("\n");
+            }
+            sendMessage.setText("Number of users: " + profileList.size() + "\n" + stringBuilder);
+            executeMsg(sendMessage);
+        }
+    }
+
+    private void adminPanel(Message message) {
+        if (service.adminCheck(message)) {
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setText(service.getMessage("helloAdmin"));
+            sendMessage.setReplyMarkup(replyKeyboardUtil.adminButton(service.getMessage("profileList"), service.getMessage("sendMessagesToUsers")));
+            executeMsg(sendMessage);
         }
     }
 
