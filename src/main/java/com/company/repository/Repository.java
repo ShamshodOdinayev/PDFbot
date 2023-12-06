@@ -92,7 +92,8 @@ public class Repository {
         }
         return null;
     }
-    public List<Profile> getAll(){
+
+    public List<Profile> getAll() {
         try (Connection connection = DataBase.getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from profile");

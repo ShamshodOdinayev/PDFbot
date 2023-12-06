@@ -9,10 +9,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -27,6 +24,7 @@ import java.util.List;
 public class PDFBotLongPolling extends TelegramLongPollingBot {
     ServiceEnum service = new ServiceI();
     ReplyKeyboardUtil replyKeyboardUtil = new ReplyKeyboardUtil();
+    Repository repository = new Repository();
 
     int additionalName = 1;
 
@@ -46,18 +44,24 @@ public class PDFBotLongPolling extends TelegramLongPollingBot {
             if (update.hasMessage()) {
                 Message message = update.getMessage();
                 if (update.getMessage().hasText()) {
-                    if (message.getText().equals("/start")) {
-                        if (service.createProfile(message)) {
-                            startMenuMessage(message);
+                    String messageText = message.getText();
+                    Profile profile;
+                    switch (messageText) {
+                        case "/start" -> {
+                            if (service.createProfile(message)) {
+                                startMenuMessage(message);
+                            }
                         }
-                    } else if (message.getText().equals("Rasm jo'natish yakunlandi")) {
-                        pictureSaveMessage(message);
-                    } else if (message.getText().equals("Create PDF")) {
-                        createPDF(message);
-                    } else if (message.getText().equals("/adminjon")) {
-                        adminPanel(message);
-                    } else if (message.getText().equals("Foydalanuvchilarni ko'rish")) {
-                        getAllProfile(message);
+                        case "Rasm jo'natish yakunlandi" -> pictureSaveMessage(message);
+                        case "Create PDF" -> createPDF(message);
+                        case "/adminjon" -> adminPanel(message);
+                        case "Foydalanuvchilarni ko'rish" -> getAllProfile(message);
+                        case "Foydalanuvchilarga xabar jo'natish" -> sendMessageToAdmin(message);
+                        default -> {
+                            if (service.adminCheck(message)) {
+                                sendMessagesToUsers(message);
+                            } else elseMessage(message.getChatId());
+                        }
                     }
                 } else if (message.hasPhoto()) {
                     pictureSave(update);
@@ -68,9 +72,24 @@ public class PDFBotLongPolling extends TelegramLongPollingBot {
         }
     }
 
+    private void sendMessagesToUsers(Message message) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(message.getText());
+        for (Profile profile : repository.getAll()) {
+            sendMessage.setChatId(profile.getChatId());
+            executeMsg(sendMessage);
+        }
+    }
+
+    private void sendMessageToAdmin(Message message) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(message.getChatId());
+        sendMessage.setText(service.getMessage("sendMessageToUsers"));
+        executeMsg(sendMessage);
+    }
+
     private void getAllProfile(Message message) {
         if (service.adminCheck(message)) {
-            Repository repository = new Repository();
             List<Profile> profileList = repository.getAll();
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(message.getChatId());

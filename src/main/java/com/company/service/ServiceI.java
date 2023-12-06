@@ -111,7 +111,7 @@ public class ServiceI implements ServiceEnum {
     public boolean adminCheck(Message message) {
         Profile profile = repository.getProfileByChatId(message.getChatId().toString());
         if (profile != null && profile.getRole().equals(ProfileRole.ADMIN)) {
-           return true;
+            return true;
         }
         return false;
     }
