@@ -7,13 +7,28 @@ import java.sql.Statement;
 
 public class DataBase {
     public static Connection getConnection() {
+//        try {
+//            return DriverManager.getConnection("postgresql://postgres:wLlRErexWNOSqgtfxCrjQHFnmOhHIICw@interchange.proxy.rlwy.net:54231/railway", "user", "1702");
+//        } catch (SQLException e) {
+//            System.out.println(e.getSQLState());
+//            e.printStackTrace();
+//            System.exit(-1);
+//        }
         try {
-            return DriverManager.getConnection("postgresql://postgres:wLlRErexWNOSqgtfxCrjQHFnmOhHIICw@interchange.proxy.rlwy.net:54231/railway", "user", "1702");
+            // Railway'dagi DATABASE_URL ni olish
+            String databaseUrl = System.getenv("postgresql://postgres:mERrItduiuCpGbIyQYlafLxnzUQHvyYR@postgres.railway.internal:5432/railway");
+            if (databaseUrl == null || databaseUrl.isEmpty()) {
+                throw new SQLException("DATABASE_URL environment variable not found!");
+            }
+
+            // PostgreSQL JDBC driveri uchun ulanish
+            return DriverManager.getConnection(databaseUrl);
         } catch (SQLException e) {
-            System.out.println(e.getSQLState());
+            System.out.println("SQL State: " + e.getSQLState());
             e.printStackTrace();
             System.exit(-1);
         }
+
         return null;
     }
 
