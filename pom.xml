@@ -17,7 +17,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.example.PDFBot</mainClass> <!-- Sizning asosiy sinfingiz -->
+                            <mainClass>com.company.PDFBot</mainClass> <!-- Sizning asosiy sinfingiz -->
                         </manifest>
                     </archive>
                 </configuration>
