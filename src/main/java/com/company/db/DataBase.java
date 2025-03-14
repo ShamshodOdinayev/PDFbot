@@ -8,7 +8,7 @@ import java.sql.Statement;
 public class DataBase {
     public static Connection getConnection() {
         try {
-            return DriverManager.getConnection("jdbc:postgresql://localhost:5432/pdf_bot", "jdbc_user", "123456");
+            return DriverManager.getConnection("jdbc:postgresql://localhost:5432/pdf", "user", "1702");
         } catch (SQLException e) {
             System.out.println(e.getSQLState());
             e.printStackTrace();
