@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DataBase {
-    public static Connection getConnection() {
+    public static Connection getConnection() throws SQLException {
 //        try {
 //            return DriverManager.getConnection("postgresql://postgres:wLlRErexWNOSqgtfxCrjQHFnmOhHIICw@interchange.proxy.rlwy.net:54231/railway", "user", "1702");
 //        } catch (SQLException e) {
@@ -14,22 +14,15 @@ public class DataBase {
 //            e.printStackTrace();
 //            System.exit(-1);
 //        }
-        try {
-            // Railway'dagi DATABASE_URL ni olish
-            String databaseUrl = System.getenv("postgresql://postgres:mERrItduiuCpGbIyQYlafLxnzUQHvyYR@postgres.railway.internal:5432/railway");
-            if (databaseUrl == null || databaseUrl.isEmpty()) {
-                throw new SQLException("DATABASE_URL environment variable not found!");
-            }
+        String host = System.getenv("postgres.railway.internal");
+        String port = System.getenv("5432");
+        String user = System.getenv("postgres");
+        String password = System.getenv("mERrItduiuCpGbIyQYlafLxnzUQHvyYR");
+        String database = System.getenv("railway");
 
-            // PostgreSQL JDBC driveri uchun ulanish
-            return DriverManager.getConnection(databaseUrl);
-        } catch (SQLException e) {
-            System.out.println("SQL State: " + e.getSQLState());
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        String url = "jdbc:postgresql://" + host + ":" + port + "/" + database;
+        return DriverManager.getConnection(url, user, password);
 
-        return null;
     }
 
     public static void initTable() {
